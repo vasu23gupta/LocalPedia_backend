@@ -37,9 +37,9 @@ const usersRoute = require('./routes/users');
 app.use('/users', usersRoute);
 
 //db
-async function connectDB(){
-    await mongoose.connect("mongodb+srv://testUser:testPass@cluster0.neji0.mongodb.net/test?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log("db connected");
+async function connectDB() {
+  await mongoose.connect("mongodb+srv://testUser:testPass@cluster0.neji0.mongodb.net/test?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true });
+  console.log("db connected");
 }
 connectDB();
 
@@ -47,4 +47,4 @@ app.get('/', (req, res) => {
   res.send('Welcome to test_proj');
 })
 
-app.listen(port);
+app.listen(process.env.PORT || port);
