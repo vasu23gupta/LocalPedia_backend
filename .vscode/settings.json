@@ -2,5 +2,7 @@
     "appService.zipIgnorePattern": [
         "node_modules{,/**}",
         ".vscode{,/**}"
-    ]
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/2cdfa9c4-39d5-4895-8700-2f0eb3ac275a/resourceGroups/LocalPediaBackend/providers/Microsoft.Web/sites/LocalPediaBackend",
+    "appService.deploySubpath": "."
 }

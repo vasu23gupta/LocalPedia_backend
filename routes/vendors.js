@@ -110,7 +110,7 @@ router.get('/:neLat/:neLng/:swLat/:swLng', async (req, res) => {
                 }
             }
         }
-    }, { location: true, tags:true}).exec(function (err, docs) {
+    }, { location: true, tags: true }).exec(function (err, docs) {
         if (err) {
             res.json({ message: err });
         }
@@ -235,7 +235,7 @@ router.get('/filterOnMap/:neLat/:neLng/:swLat/:swLng', async (req, res) => {
                 }
             }
         }
-    }, { location: 1 }, function (err, docs) {
+    }, { location: 1, tags: 1 }, function (err, docs) {
 
         if (err) {
             res.json({ message: err });
