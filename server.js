@@ -5,6 +5,8 @@ const cors = require('cors');
 //var multer  = require('multer')
 const app = express();
 const port = 3000;
+const dotenv = require('dotenv');
+dotenv.config();
 
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
@@ -35,6 +37,9 @@ app.use('/reports', reportRoute);
 
 const usersRoute = require('./routes/users');
 app.use('/users', usersRoute);
+
+const utilsRoute = require('./routes/utils');
+app.use('/utils', utilsRoute);
 
 //db
 async function connectDB() {
