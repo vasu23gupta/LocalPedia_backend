@@ -33,7 +33,6 @@ router.post('/', async (req, res) => {
         var userObj = await admin.auth().verifyIdToken(jwt);
         if (userObj.firebase.sign_in_provider == 'anonymous') return;
         var userId = userObj.uid;
-        print(userId);
         var vendor = await Vendor.findById(
             req.body.vendorId,
             {

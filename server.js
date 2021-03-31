@@ -49,7 +49,7 @@ async function connectDB() {
 connectDB();
 
 app.get('/', (req, res) => {
-  res.send('Welcome to test_proj');
+  res.send('Welcome to LocalPedia');
 })
 
 app.listen(process.env.PORT || port);
