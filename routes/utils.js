@@ -4,6 +4,7 @@ const https = require('https');
 const querystring = require('querystring');
 const admin = require('../firebaseAdminSdk');
 const dotenv = require('dotenv');
+const fs = require('fs');
 
 dotenv.config();
 
@@ -54,5 +55,19 @@ router.get('/mapApiKey', async (req, res) => {
 
 
 });
+
+//get TnC
+router.get('/tnc', (req, res) => {
+    fs.readFile('./views/tnc.html', 'utf8', (err, text) => {
+        res.send(text);
+    });
+})
+
+//get PP
+router.get('/pp', (req, res) => {
+    fs.readFile('./views/pp.html', 'utf8', (err, text) => {
+        res.send(text);
+    });
+})
 
 module.exports = router;

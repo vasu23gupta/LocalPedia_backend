@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-//var multer  = require('multer')
 const app = express();
 const port = 3000;
 const dotenv = require('dotenv');
