@@ -23,6 +23,15 @@ const UserSchema = mongoose.Schema({
     vendorsReportedByMe: {
         type: [String],
     },
+    level:{
+        type: Number,
+    },
+    points:{
+        type: Number,
+    },
+    nextLevelAt:{
+        type: Number,
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Users', UserSchema);

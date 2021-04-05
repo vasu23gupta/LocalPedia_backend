@@ -14,9 +14,13 @@ router.get('/', async (req, res) => {
 });
 
 //get one user by id
-router.get('/:userId', async (req, res) => {
+router.get('/getUserByJWT', async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId);
+        var jwt = req.get('authorisation');
+        var userObj = await admin.auth().verifyIdToken(jwt);
+        if (userObj.firebase.sign_in_provider == 'anonymous') return;
+        var userId = userObj.uid;
+        const user = await User.findById(userId);
         res.json(user);
     } catch (err) {
         res.json({ message: err });
@@ -32,7 +36,10 @@ router.post('/', async (req, res) => {
         var userId = userObj.uid;
         const user = new User({
             _id: userId,
-            username: req.body.username
+            username: req.body.username,
+            nextLevelAt: 100,
+            points:0,
+            level:0
         });
         const savedUser = await user.save();
         res.json(savedUser);

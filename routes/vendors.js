@@ -3,6 +3,7 @@ const router = express.Router();
 const Vendor = require('../models/Vendor');
 const User = require('../models/User');
 const admin = require('../firebaseAdminSdk');
+const { response } = require('express');
 
 // async function getUserFromJwt(jwt) {
 //     var obj = await admin.auth().verifyIdToken(jwt);
@@ -268,11 +269,25 @@ router.post('/', async (req, res) => {
             address: req.body.address,
         });
 
-        const savedVendor = await vendor.save();
+        const savedVendor = await vendor.save()
+        const user = await User.findOne({_id: userId})
+        const points = user.points;
+        var level=user.level
+        var nextLevelAt=user.nextLevelAt
+        if(points+50>=user.nextLevelAt)
+        {
+            level=user.level+1
+            nextLevelAt=(25*(level+1)*(level+1))+75*(level+1)
+        }
         const updatedUser = await User.updateOne({ _id: userId }, {
             $push: {
                 vendors: savedVendor._id
             },
+            $set: {
+                points: points + 50,
+                level:level,
+                nextLevelAt:nextLevelAt,
+            }
         });
         res.json(savedVendor);
     } catch (err) {
@@ -294,6 +309,7 @@ router.delete('/:vendorId', async (req, res) => {
 router.patch('/report/:vendorId', async (req, res) => {
 
     try {
+ 
         var response = await Vendor.updateOne({ _id: req.params.vendorId }, {
             $push: {
                 reports: req.body.reportId
@@ -316,6 +332,10 @@ router.patch('/report/:vendorId', async (req, res) => {
 router.patch('/edit/:vendorId', async (req, res) => {
 
     try {
+        var jwt = req.get('authorisation');
+        var userObj = await admin.auth().verifyIdToken(jwt);
+        if (userObj.firebase.sign_in_provider == 'anonymous') return;
+        var userId = userObj.uid;
         await Vendor.updateOne({ _id: req.params.vendorId }, {
             $set: {
                 name: req.body.name,
@@ -326,9 +346,23 @@ router.patch('/edit/:vendorId', async (req, res) => {
                 address: req.body.address,
             }
         });
-
         const updatedVendor = await Vendor.findById(req.params.vendorId, { totalStars: 0, totalReviews: 0, reports: 0, totalReports: 0 });
-
+        const user=await User.findOne({_id: userId})
+        var points=user.points
+        var level = user.level
+        var nextLevelAt=user.nextLevelAt
+        if(points+20>=nextLevelAt)
+        {
+            level=user.level+1
+            nextLevelAt=(25*(level+1)*(level+1))+75*(level+1)
+        }
+        const updatedUser=await User.updateOne({_id:userId},{
+            $set:{
+                level:level,
+                points:points+20,
+                nextLevelAt:nextLevelAt,
+            }
+        });
         res.json(updatedVendor);
     }
     catch (err) {
