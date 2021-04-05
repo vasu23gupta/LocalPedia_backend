@@ -72,11 +72,25 @@ router.post('/', async (req, res) => {
 
 
         const savedReview = await review.save();
+        const user=await User.findOne({_id: userId})
+        const points=user.points
+        var level=user.level;
+        var nextLevelAt=user.nextLevelAt
+        if(points+10>=user.nextLevelAt)
+        {
+            level=user.level+1
+            nextLevelAt=(25*(level+1)*(level+1))+75*(level+1)
+        }
         const updatedUser = await User.updateOne({ _id: userId }, {
             $push: {
                 reviews: savedReview._id,
                 vendorsReviewedByMe: req.body.vendorId
             },
+            $set:{
+                points:points+10,
+                level:level,
+                nextLevelAt:nextLevelAt,
+            }
         });
         var vendor = await Vendor.findByIdAndUpdate({ _id: req.body.vendorId }, {
             $push: {
