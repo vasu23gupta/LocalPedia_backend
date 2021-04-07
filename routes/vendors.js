@@ -17,6 +17,25 @@ const { response } = require('express');
 //     var user = await getUserFromJwt(req.get('authorisation'));
 // });
 
+const monthChanged = (user) => {
+    var month = new Date().getMonth()
+    var year = new Date().getFullYear()
+    if(year>user.lastVendorAdded.getFullYear() || user.lastVendorAdded.getMonth()<month)
+    {
+        return true;
+    }
+    else
+    return false;
+}
+
+const monthChangedEdit = (user) => {
+    var month = new Date().getMonth()
+    var year = new Date().getFullYear()
+    if(year>user.lastVendorAdded.getFullYear() || user.lastVendorAdded.getMonth()<month)
+    return true;
+    else
+    return false;
+}
 
 // get all vendors for debugging
 router.get('/', async (req, res) => {
@@ -256,40 +275,51 @@ router.post('/', async (req, res) => {
         if (userObj.firebase.sign_in_provider == 'anonymous') return;
         var userId = userObj.uid;
 
-        const vendor = new Vendor({
-            name: req.body.name,
-            location: { coordinates: [req.body.lng, req.body.lat] },
-            tags: req.body.tags,
-            description: req.body.description,
-            totalReviews: 0,
-            totalStars: 0,
-            rating: 0,
-            totalReports: 0,
-            postedBy: userId,
-            address: req.body.address,
-        });
-
-        const savedVendor = await vendor.save()
         const user = await User.findOne({_id: userId})
-        const points = user.points;
-        var level=user.level
-        var nextLevelAt=user.nextLevelAt
-        if(points+50>=user.nextLevelAt)
-        {
-            level=user.level+1
-            nextLevelAt=(25*(level+1)*(level+1))+75*(level+1)
-        }
-        const updatedUser = await User.updateOne({ _id: userId }, {
-            $push: {
-                vendors: savedVendor._id
-            },
-            $set: {
-                points: points + 50,
-                level:level,
-                nextLevelAt:nextLevelAt,
+        if(user.lastVendorAdded==null || monthChanged(user) || user.addsRemaining>0)
+        {   
+            const vendor = new Vendor({
+                name: req.body.name,
+                location: { coordinates: [req.body.lng, req.body.lat] },
+                tags: req.body.tags,
+                description: req.body.description,
+                totalReviews: 0,
+                totalStars: 0,
+                rating: 0,
+                totalReports: 0,
+                postedBy: userId,
+                address: req.body.address,
+            });
+            const savedVendor = await vendor.save()
+            var addsRem=user.addsRemaining
+            var points = user.points;
+            var level=user.level
+            var nextLevelAt=user.nextLevelAt
+            if(points+50>=user.nextLevelAt)
+            {
+                level=user.level+1
+                nextLevelAt=(25*(level+1)*(level+1))+75*(level+1)
             }
-        });
-        res.json(savedVendor);
+            if(user.lastVendorAdded==null || monthChanged(user))
+            addsRem=10;
+            const updatedUser = await User.updateOne({ _id: userId }, {
+                $push: {
+                    vendors: savedVendor._id
+                },
+                $set: {
+                    points: points + 50,
+                    level:level,
+                    nextLevelAt:nextLevelAt,
+                    lastVendorAdded:savedVendor.createdAt,
+                    addsRemaining:addsRem-1
+                }
+            });
+            res.json(savedVendor);
+        }
+        else
+        {
+            res.json({"limitExceeded": "You cannot add more vendors this month"})
+        }
     } catch (err) {
         res.json({ message: err });
     }
@@ -336,34 +366,45 @@ router.patch('/edit/:vendorId', async (req, res) => {
         var userObj = await admin.auth().verifyIdToken(jwt);
         if (userObj.firebase.sign_in_provider == 'anonymous') return;
         var userId = userObj.uid;
-        await Vendor.updateOne({ _id: req.params.vendorId }, {
-            $set: {
-                name: req.body.name,
-                location: { type: "Point", coordinates: [req.body.lng, req.body.lat] },
-                tags: req.body.tags,
-                images: req.body.images,
-                description: req.body.description,
-                address: req.body.address,
-            }
-        });
-        const updatedVendor = await Vendor.findById(req.params.vendorId, { totalStars: 0, totalReviews: 0, reports: 0, totalReports: 0 });
         const user=await User.findOne({_id: userId})
-        var points=user.points
-        var level = user.level
-        var nextLevelAt=user.nextLevelAt
-        if(points+20>=nextLevelAt)
-        {
-            level=user.level+1
-            nextLevelAt=(25*(level+1)*(level+1))+75*(level+1)
-        }
-        const updatedUser=await User.updateOne({_id:userId},{
-            $set:{
-                level:level,
-                points:points+20,
-                nextLevelAt:nextLevelAt,
+        if(user.lastVendorEdited==null || monthChangedEdit(user) || user.editsRemaining>0){
+            await Vendor.updateOne({ _id: req.params.vendorId }, {
+                $set: {
+                    name: req.body.name,
+                    location: { type: "Point", coordinates: [req.body.lng, req.body.lat] },
+                    tags: req.body.tags,
+                    images: req.body.images,
+                    description: req.body.description,
+                    address: req.body.address,
+                }
+            });
+            const updatedVendor = await Vendor.findById(req.params.vendorId, { totalStars: 0, totalReviews: 0, reports: 0, totalReports: 0 });
+            var editsRem=user.editsRemaining
+            var points=user.points
+            var level = user.level
+            var nextLevelAt=user.nextLevelAt
+            if(points+20>=nextLevelAt)
+            {
+                level=user.level+1
+                nextLevelAt=(25*(level+1)*(level+1))+75*(level+1)
             }
-        });
-        res.json(updatedVendor);
+            if(user.lastVendorEdited==null || monthChangedEdit(user))
+            editsRem=10;
+            const updatedUser=await User.updateOne({_id:userId},{
+                $set:{
+                    level:level,
+                    points:points+20,
+                    nextLevelAt:nextLevelAt,
+                    lastVendorEdited:updatedVendor.updatedAt,
+                    editsRemaining:editsRem-1
+                }
+            });
+            res.json(updatedVendor);
+        }
+        else 
+        {
+            res.json({"limitExceeded": "You cannot edit more vendors this month"})
+        }
     }
     catch (err) {
         res.json({ message: err });
