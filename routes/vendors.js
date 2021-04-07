@@ -178,7 +178,7 @@ router.get('/search/:query/:radius/:lat/:long', async (req, res) => {
         regexSearchOptions = {
             $or: searchTextList
         };
-        Vendor.find(regexSearchOptions, { name: 1, tags: 1, rating: 1, location: 1, createdAt: 1 }, function (err, docs) {
+        Vendor.find(regexSearchOptions, { name: 1, tags: 1, rating: 1, location: 1, createdAt: 1, images: { $slice: 1 } }, function (err, docs) {
 
             if (err) {
                 res.json({ message: err });
@@ -270,14 +270,13 @@ router.post('/', async (req, res) => {
         });
 
         const savedVendor = await vendor.save()
-        const user = await User.findOne({_id: userId})
+        const user = await User.findOne({ _id: userId })
         const points = user.points;
-        var level=user.level
-        var nextLevelAt=user.nextLevelAt
-        if(points+50>=user.nextLevelAt)
-        {
-            level=user.level+1
-            nextLevelAt=(25*(level+1)*(level+1))+75*(level+1)
+        var level = user.level
+        var nextLevelAt = user.nextLevelAt
+        if (points + 50 >= user.nextLevelAt) {
+            level = user.level + 1
+            nextLevelAt = (25 * (level + 1) * (level + 1)) + 75 * (level + 1)
         }
         const updatedUser = await User.updateOne({ _id: userId }, {
             $push: {
@@ -285,8 +284,8 @@ router.post('/', async (req, res) => {
             },
             $set: {
                 points: points + 50,
-                level:level,
-                nextLevelAt:nextLevelAt,
+                level: level,
+                nextLevelAt: nextLevelAt,
             }
         });
         res.json(savedVendor);
@@ -309,7 +308,7 @@ router.delete('/:vendorId', async (req, res) => {
 router.patch('/report/:vendorId', async (req, res) => {
 
     try {
- 
+
         var response = await Vendor.updateOne({ _id: req.params.vendorId }, {
             $push: {
                 reports: req.body.reportId
@@ -347,20 +346,19 @@ router.patch('/edit/:vendorId', async (req, res) => {
             }
         });
         const updatedVendor = await Vendor.findById(req.params.vendorId, { totalStars: 0, totalReviews: 0, reports: 0, totalReports: 0 });
-        const user=await User.findOne({_id: userId})
-        var points=user.points
+        const user = await User.findOne({ _id: userId })
+        var points = user.points
         var level = user.level
-        var nextLevelAt=user.nextLevelAt
-        if(points+20>=nextLevelAt)
-        {
-            level=user.level+1
-            nextLevelAt=(25*(level+1)*(level+1))+75*(level+1)
+        var nextLevelAt = user.nextLevelAt
+        if (points + 20 >= nextLevelAt) {
+            level = user.level + 1
+            nextLevelAt = (25 * (level + 1) * (level + 1)) + 75 * (level + 1)
         }
-        const updatedUser=await User.updateOne({_id:userId},{
-            $set:{
-                level:level,
-                points:points+20,
-                nextLevelAt:nextLevelAt,
+        const updatedUser = await User.updateOne({ _id: userId }, {
+            $set: {
+                level: level,
+                points: points + 20,
+                nextLevelAt: nextLevelAt,
             }
         });
         res.json(updatedVendor);
