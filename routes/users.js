@@ -53,14 +53,16 @@ router.post('/google', async (req, res) => {
     try {
         var jwt = req.get('authorisation');
         var userObj = await admin.auth().verifyIdToken(jwt);
-        if (userObj.firebase.sign_in_provider == 'anonymous') return;
+        if (userObj.firebase.sign_in_provider != 'google.com') return;
         var userId = userObj.uid;
         var user = await User.findById(userId);
-        console.log(user);
         if (user == null) {
             user = new User({
                 _id: userId,
-                username: req.body.username
+                username: req.body.username,
+                nextLevelAt: 100,
+                points:0,
+                level:0
             });
             const savedUser = await user.save();
             res.json(savedUser);
