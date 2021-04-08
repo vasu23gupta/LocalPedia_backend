@@ -20,7 +20,34 @@ router.get('/getUserByJWT', async (req, res) => {
         var userObj = await admin.auth().verifyIdToken(jwt);
         if (userObj.firebase.sign_in_provider == 'anonymous') return;
         var userId = userObj.uid;
-        const user = await User.findById(userId);
+        var user = await User.findById(userId);
+        var year=new Date().getFullYear()
+        var month=new Date().getMonth()
+        var updated=false;
+        var updatedUser;
+        if(user.lastVendorAdded!=null && (user.lastVendorAdded.getFullYear()<year || user.lastVendorAdded.getMonth()<month))
+        {
+            updated=true;
+            user.addsRemaining=10
+            updatedUser=await User.updateOne({_id:userId},{
+                $set:{
+                   addsRemaining: user.addsRemaining
+                }
+            });
+        }
+        if(user.lastVendorEdited!=null && (user.lastVendorEdited.getFullYear()<year || user.lastVendorEdited.getMonth()<month))
+        {
+            updated=true;
+            user.editsRemaining=10
+            updatedUser=await User.updateOne({_id:userId},{
+                $set:{
+                   editsRemaining: user.editsRemaining
+                }
+            });
+        }
+        if(updated){console.log(updatedUser)
+        res.json(updatedUser);}
+        else
         res.json(user);
     } catch (err) {
         res.json({ message: err });
@@ -39,7 +66,9 @@ router.post('/', async (req, res) => {
             username: req.body.username,
             nextLevelAt: 100,
             points:0,
-            level:0
+            level:0,
+            editsRemaining:10,
+            addsRemaining:10
         });
         const savedUser = await user.save();
         res.json(savedUser);

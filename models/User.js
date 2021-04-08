@@ -31,6 +31,18 @@ const UserSchema = mongoose.Schema({
     },
     nextLevelAt:{
         type: Number,
+    },
+    editsRemaining:{
+        type: Number,
+    },
+    addsRemaining:{
+        type: Number,
+    },
+    lastVendorAdded:{
+        type: Date,
+    },
+    lastVendorEdited:{
+        type: Date,
     }
 }, { timestamps: true });
 
