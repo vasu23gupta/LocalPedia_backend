@@ -91,7 +91,9 @@ router.post('/google', async (req, res) => {
                 username: req.body.username,
                 nextLevelAt: 100,
                 points:0,
-                level:0
+                level:0,
+                editsRemaining:10,
+                addsRemaining:10
             });
             const savedUser = await user.save();
             res.json(savedUser);
