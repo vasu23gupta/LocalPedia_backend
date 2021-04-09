@@ -41,16 +41,12 @@ router.get('/mapApiKey', async (req, res) => {
     var jwt = req.get('authorisation');
     await admin
         .auth()
-        .verifyIdToken(jwt, true)
+        .verifyIdToken(jwt)
         .then((payload) => {
             res.json({ "key": process.env.AZUREKEY });
         })
         .catch((error) => {
-            if (error.code == 'auth/id-token-revoked') {
-                res.status(err.status || 401).json(error);
-            } else {
-                res.status(err.status || 500).json(error);
-            }
+            res.status(err.status || 500).json(error);
         });
 
 
