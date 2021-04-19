@@ -240,7 +240,7 @@ router.get('/filterOnMap/:neLat/:neLng/:swLat/:swLng', async (req, res) => {
     var swLat = req.params.swLat;
     var swLng = req.params.swLng;
     Vendor.find({
-        tags: { $in: tagsList },
+        tags: { $all: tagsList },
         location: {
             $geoWithin: {
                 $geometry: {
