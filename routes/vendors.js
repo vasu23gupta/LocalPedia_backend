@@ -197,7 +197,7 @@ router.get('/search/:query/:radius/:lat/:long', async (req, res) => {
         regexSearchOptions = {
             $or: searchTextList
         };
-        Vendor.find(regexSearchOptions, { name: 1, tags: 1, rating: 1, location: 1, createdAt: 1, images: { $slice: 1 } }, function (err, docs) {
+        Vendor.find(regexSearchOptions, { name: 1, tags: 1, rating: 1, location: 1, createdAt: 1, images: { $slice: 1 }, address: 1 }, function (err, docs) {
 
             if (err) {
                 res.json({ message: err });
