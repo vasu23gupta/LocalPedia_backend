@@ -21,34 +21,42 @@ router.get('/getUserByJWT', async (req, res) => {
         if (userObj.firebase.sign_in_provider == 'anonymous') return;
         var userId = userObj.uid;
         var user = await User.findById(userId);
-        var year=new Date().getFullYear()
-        var month=new Date().getMonth()
-        var updated=false;
+        var year = new Date().getFullYear()
+        var month = new Date().getMonth()
+        var updated = false;
         var updatedUser;
-        if(user.lastVendorAdded!=null && (user.lastVendorAdded.getFullYear()<year || user.lastVendorAdded.getMonth()<month))
-        {
-            updated=true;
-            user.addsRemaining=10
-            updatedUser=await User.updateOne({_id:userId},{
-                $set:{
-                   addsRemaining: user.addsRemaining
-                }
-            });
+        if (user.lastVendorAdded != null && (user.lastVendorAdded.getFullYear() < year || user.lastVendorAdded.getMonth() < month)) {
+            updated = true;
+            user.addsRemaining = 10
+            updatedUser = await User.findOneAndUpdate(
+                { _id: userId },
+                {
+                    $set: {
+                        addsRemaining: user.addsRemaining
+                    }
+                },
+                { new: true }
+            );
         }
-        if(user.lastVendorEdited!=null && (user.lastVendorEdited.getFullYear()<year || user.lastVendorEdited.getMonth()<month))
-        {
-            updated=true;
-            user.editsRemaining=10
-            updatedUser=await User.updateOne({_id:userId},{
-                $set:{
-                   editsRemaining: user.editsRemaining
-                }
-            });
+        if (user.lastVendorEdited != null && (user.lastVendorEdited.getFullYear() < year || user.lastVendorEdited.getMonth() < month)) {
+            updated = true;
+            user.editsRemaining = 10
+            updatedUser = await User.findOneAndUpdate(
+                { _id: userId },
+                {
+                    $set: {
+                        editsRemaining: user.editsRemaining
+                    }
+                },
+                { new: true }
+            );
         }
-        if(updated){console.log(updatedUser)
-        res.json(updatedUser);}
+        if (updated) {
+            console.log(updatedUser)
+            res.json(updatedUser);
+        }
         else
-        res.json(user);
+            res.json(user);
     } catch (err) {
         res.json({ message: err });
     }
@@ -65,10 +73,10 @@ router.post('/', async (req, res) => {
             _id: userId,
             username: req.body.username,
             nextLevelAt: 100,
-            points:0,
-            level:0,
-            editsRemaining:10,
-            addsRemaining:10
+            points: 0,
+            level: 0,
+            editsRemaining: 10,
+            addsRemaining: 10
         });
         const savedUser = await user.save();
         res.json(savedUser);
@@ -90,10 +98,10 @@ router.post('/google', async (req, res) => {
                 _id: userId,
                 username: req.body.username,
                 nextLevelAt: 100,
-                points:0,
-                level:0,
-                editsRemaining:10,
-                addsRemaining:10
+                points: 0,
+                level: 0,
+                editsRemaining: 10,
+                addsRemaining: 10
             });
             const savedUser = await user.save();
             res.json(savedUser);
@@ -114,18 +122,18 @@ router.delete('/:userId', async (req, res) => {
     }
 });
 
-//add vendor to user
-router.patch('/:userId', async (req, res) => {
-    try {
-        const updatedUser = await User.updateOne({ _id: req.params.userId }, {
-            $push: {
-                vendors: req.body.vendorId
-            },
-        });
-        res.json(updatedUser);
-    } catch (err) {
-        res.json({ message: err });
-    }
-});
+// //add vendor to user
+// router.patch('/:userId', async (req, res) => {
+//     try {
+//         const updatedUser = await User.updateOne({ _id: req.params.userId }, {
+//             $push: {
+//                 vendors: req.body.vendorId
+//             },
+//         });
+//         res.json(updatedUser);
+//     } catch (err) {
+//         res.json({ message: err });
+//     }
+// });
 
 module.exports = router;
