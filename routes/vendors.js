@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Vendor = require('../models/Vendor');
+const Vendor = require('../models/Vendor').vendor;
 const User = require('../models/User');
 const admin = require('../firebaseAdminSdk');
 const { response } = require('express');
@@ -38,14 +38,14 @@ const monthChangedEdit = (user) => {
 }
 
 // get all vendors for debugging
-router.get('/', async (req, res) => {
-    try {
-        const vendors = await Vendor.find();
-        res.json(vendors);
-    } catch (err) {
-        res.json({ message: err });
-    }
-});
+// router.get('/', async (req, res) => {
+//     try {
+//         const vendors = await Vendor.find();
+//         res.json(vendors);
+//     } catch (err) {
+//         res.json({ message: err });
+//     }
+// });
 
 //get one vendor by id
 router.get('/:vendorId', async (req, res) => {
@@ -80,34 +80,34 @@ router.get('/:vendorId', async (req, res) => {
 });
 
 //get one vendor by id with optional parameters, not in use rn
-router.get('/:vendorId/:name/:tags/:location/:description/:images/:reviews/:rating', async (req, res) => {
-    //    if (req.params.vendorId=="null") {
-    try {
-        const vendor = await Vendor.findById({ _id: req.params.vendorId }, {
-            _id: 0,
-            __v: 0,
-            name: req.params.name == 'true' ? 1 : 0,
-            location: req.params.location == 'true' ? 1 : 0,
-            tags: req.params.tags == 'true' ? 1 : 0,
-            images: req.params.images == 'true' ? 1 : 0,
-            description: req.params.description == 'true' ? 1 : 0,
-            reviews: req.params.reviews == 'true' ? 1 : 0,
-            rating: req.params.rating == 'true' ? 1 : 0
-        });
-        res.json(vendor);
-    } catch (err) {
-        res.json({ message: err });
-    }
-    //    }
-    // else{
-    //     try {
-    //         const vendor = await Vendor.findById(req.params.vendorId);
-    //         res.json(vendor);
-    //     } catch (err) {
-    //         res.json({ message: err });
-    //     }
-    // }
-});
+// router.get('/:vendorId/:name/:tags/:location/:description/:images/:reviews/:rating', async (req, res) => {
+//     //    if (req.params.vendorId=="null") {
+//     try {
+//         const vendor = await Vendor.findById({ _id: req.params.vendorId }, {
+//             _id: 0,
+//             __v: 0,
+//             name: req.params.name == 'true' ? 1 : 0,
+//             location: req.params.location == 'true' ? 1 : 0,
+//             tags: req.params.tags == 'true' ? 1 : 0,
+//             images: req.params.images == 'true' ? 1 : 0,
+//             description: req.params.description == 'true' ? 1 : 0,
+//             reviews: req.params.reviews == 'true' ? 1 : 0,
+//             rating: req.params.rating == 'true' ? 1 : 0
+//         });
+//         res.json(vendor);
+//     } catch (err) {
+//         res.json({ message: err });
+//     }
+//     //    }
+//     // else{
+//     //     try {
+//     //         const vendor = await Vendor.findById(req.params.vendorId);
+//     //         res.json(vendor);
+//     //     } catch (err) {
+//     //         res.json({ message: err });
+//     //     }
+//     // }
+// });
 
 //get all within bounds
 router.get('/:neLat/:neLng/:swLat/:swLng', async (req, res) => {
@@ -326,37 +326,37 @@ router.post('/', async (req, res) => {
 });
 
 //delete vendor, not in use rn
-router.delete('/:vendorId', async (req, res) => {
-    try {
-        const removedVendor = await Vendor.deleteOne({ _id: req.params.vendorId });
-        res.json(removedVendor);
-    } catch (err) {
-        res.json({ message: err });
-    }
-});
+// router.delete('/:vendorId', async (req, res) => {
+//     try {
+//         const removedVendor = await Vendor.deleteOne({ _id: req.params.vendorId });
+//         res.json(removedVendor);
+//     } catch (err) {
+//         res.json({ message: err });
+//     }
+// });
 
 //add report
-router.patch('/report/:vendorId', async (req, res) => {
+// router.patch('/report/:vendorId', async (req, res) => {
 
-    try {
+//     try {
 
-        var response = await Vendor.updateOne({ _id: req.params.vendorId }, {
-            $push: {
-                reports: req.body.reportId
-            },
-            $inc: { totalReports: 1 },
-        });
+//         var response = await Vendor.updateOne({ _id: req.params.vendorId }, {
+//             $push: {
+//                 reports: req.body.reportId
+//             },
+//             $inc: { totalReports: 1 },
+//         });
 
-        // if((await Vendor.findById(req.params.vendorId,{totalReports:1, _id:0})).totalReports>=10){
-        //     //delete maybe
-        // }
+//         // if((await Vendor.findById(req.params.vendorId,{totalReports:1, _id:0})).totalReports>=10){
+//         //     //delete maybe
+//         // }
 
-        res.json(response);
-    }
-    catch (err) {
-        res.json({ message: err });
-    }
-});
+//         res.json(response);
+//     }
+//     catch (err) {
+//         res.json({ message: err });
+//     }
+// });
 
 //edit
 router.patch('/edit/:vendorId', async (req, res) => {

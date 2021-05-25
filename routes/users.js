@@ -4,14 +4,14 @@ const User = require('../models/User');
 const admin = require('../firebaseAdminSdk');
 
 // get all users (for testing)
-router.get('/', async (req, res) => {
-    try {
-        const user = await User.find();
-        res.json(user);
-    } catch (err) {
-        res.json({ message: err });
-    }
-});
+// router.get('/', async (req, res) => {
+//     try {
+//         const user = await User.find();
+//         res.json(user);
+//     } catch (err) {
+//         res.json({ message: err });
+//     }
+// });
 
 //get one user by id
 router.get('/getUserByJWT', async (req, res) => {
@@ -113,16 +113,16 @@ router.post('/google', async (req, res) => {
 });
 
 //delete user
-router.delete('/:userId', async (req, res) => {
-    try {
-        const removedUser = await User.deleteOne({ _id: req.params.userId });
-        res.json(removedUser);
-    } catch (err) {
-        res.json({ message: err });
-    }
-});
+// router.delete('/:userId', async (req, res) => {
+//     try {
+//         const removedUser = await User.deleteOne({ _id: req.params.userId });
+//         res.json(removedUser);
+//     } catch (err) {
+//         res.json({ message: err });
+//     }
+// });
 
-// //add vendor to user
+//add vendor to user
 // router.patch('/:userId', async (req, res) => {
 //     try {
 //         const updatedUser = await User.updateOne({ _id: req.params.userId }, {

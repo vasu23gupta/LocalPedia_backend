@@ -2,30 +2,31 @@ const express = require('express');
 const router = express.Router();
 const Report = require('../models/Report');
 const User = require('../models/User');
-const Vendor = require('../models/Vendor');
+const Vendor = require('../models/Vendor').vendor;
+const DeletedVendor = require('../models/Vendor').deletedVendor;
 const admin = require('../firebaseAdminSdk');
 const Image = require('../models/Image');
 const Review = require('../models/Review');
 
 // get all reports (for testing)
-router.get('/', async (req, res) => {
-    try {
-        const report = await Report.find();
-        res.json(report);
-    } catch (err) {
-        res.json({ message: err });
-    }
-});
+// router.get('/', async (req, res) => {
+//     try {
+//         const report = await Report.find();
+//         res.json(report);
+//     } catch (err) {
+//         res.json({ message: err });
+//     }
+// });
 
 //get one report by id
-router.get('/:reportId', async (req, res) => {
-    try {
-        const report = await Report.findById(req.params.reportId);
-        res.json(report);
-    } catch (err) {
-        res.json({ message: err });
-    }
-});
+// router.get('/:reportId', async (req, res) => {
+//     try {
+//         const report = await Report.findById(req.params.reportId);
+//         res.json(report);
+//     } catch (err) {
+//         res.json({ message: err });
+//     }
+// });
 
 //add report
 router.post('/', async (req, res) => {
@@ -43,7 +44,7 @@ router.post('/', async (req, res) => {
         ).lean();
         if (vendor.reporters.includes(userId)) {
             print('already reported');
-            res.json({ message: 'You have already reviewed this vendor.' });
+            res.json({ message: 'You have already reported this vendor.' });
             return;
         }
 
@@ -60,8 +61,8 @@ router.post('/', async (req, res) => {
                 vendorsReportedByMe: req.body.vendorId
             },
         });
-        var updatedVendor = await Vendor.findOneAndUpdate(
-            { _id: req.body.vendorId },
+        var updatedVendor = await Vendor.findByIdAndUpdate(
+            req.body.vendorId,
             {
                 $push: {
                     reports: savedReport._id,
@@ -72,9 +73,9 @@ router.post('/', async (req, res) => {
             { new: true }
         ).lean();
         if (updatedVendor.totalReports >= 15) {
-            updatedVendor.images.forEach(element => {
-                Image.deleteOne({ _id: element });
-            });
+            // updatedVendor.images.forEach(element => {
+            //     Image.deleteOne({ _id: element });
+            // });
             updatedVendor.reviews.forEach(element => {
                 Review.deleteOne({ _id: element });
             });
@@ -84,7 +85,7 @@ router.post('/', async (req, res) => {
             User.updateOne({ _id: updatedVendor.postedBy }, { $pull: { vendors: updatedVendor._id } });
             User.updateMany({ vendorsReviewedByMe: { $in: updatedVendor._id } }, { $pull: { vendorsReviewedByMe: updatedVendor._id }, $pullAll: { reviews: updatedVendor.reviews } });
             User.updateMany({ vendorsReportedByMe: { $in: updatedVendor._id } }, { $pull: { vendorsReportedByMe: updatedVendor._id }, $pullAll: { reportsByMe: updatedVendor.reports } });
-            //updatedVendor.delete();
+            DeletedVendor.insertMany([updatedVendor]);
             Vendor.deleteOne({ _id: updatedVendor._id });
         }
         res.json(savedReport);
@@ -95,33 +96,15 @@ router.post('/', async (req, res) => {
 });
 
 //delete report
-router.delete('/:reportId', async (req, res) => {
-    try {
-        const removedReport = await Report.deleteOne({ _id: req.params.reportId });
-        res.json(removedReport);
-    } catch (err) {
-        res.json({ message: err });
-    }
-});
-
-//update report
-router.patch('/:reportId', async (req, res) => {
-    try {
-        const updatedReport = await Report.updateOne({ _id: req.params.reportId }, {
-            $set: {
-                //set params
-                reports: reports.add(req.body.Report),
-
-            }
-        });
-        res.json(updatedDataVendor);
-    } catch (err) {
-        res.json({ message: err });
-    }
-});
+// router.delete('/:reportId', async (req, res) => {
+//     try {
+//         const removedReport = await Report.deleteOne({ _id: req.params.reportId });
+//         res.json(removedReport);
+//     } catch (err) {
+//         res.json({ message: err });
+//     }
+// });
 
 module.exports = router;
 
-function print(string) {
-    console.log(string);
-}
+function print(string) { console.log(string); }

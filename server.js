@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 const port = 3000;
@@ -11,15 +10,10 @@ mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
-app.use(bodyParser.json());
-//app.use(multer({dest:'./uploads/'}).single('singleInputFileName'));
-// app.use(multer({ dest: './uploads/',
-//   rename: function (fieldname, filename) {
-//     return filename;
-//   },
-//  }));
+app.use(require('morgan')('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //import routes
 const vendorsRoute = require('./routes/vendors');
