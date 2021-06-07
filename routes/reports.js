@@ -76,17 +76,27 @@ router.post('/', async (req, res) => {
             // updatedVendor.images.forEach(element => {
             //     Image.deleteOne({ _id: element });
             // });
+            console.log("entered")
             updatedVendor.reviews.forEach(element => {
                 Review.deleteOne({ _id: element });
             });
             updatedVendor.reports.forEach(element => {
                 Report.deleteOne({ _id: element });
             });
-            User.updateOne({ _id: updatedVendor.postedBy }, { $pull: { vendors: updatedVendor._id } });
-            User.updateMany({ vendorsReviewedByMe: { $in: updatedVendor._id } }, { $pull: { vendorsReviewedByMe: updatedVendor._id }, $pullAll: { reviews: updatedVendor.reviews } });
-            User.updateMany({ vendorsReportedByMe: { $in: updatedVendor._id } }, { $pull: { vendorsReportedByMe: updatedVendor._id }, $pullAll: { reportsByMe: updatedVendor.reports } });
-            DeletedVendor.insertMany([updatedVendor]);
-            Vendor.deleteOne({ _id: updatedVendor._id });
+            const user = await User.findOne({_id: updatedVendor.postedBy})
+            var points = user.points
+            var level=user.level
+            var nextLevelAt=user.nextLevelAt
+            if(points-50<25*(level)*(level)+75*(level))
+            {
+                nextLevelAt=25*(level)*(level)+75*(level)
+                level=level-1;
+            }
+            await User.updateOne({ _id: updatedVendor.postedBy }, { $set: {points:points-50,level:level,nextLevelAt:nextLevelAt,addsRemaining:0,editsRemaining:0}},{ $pull: { vendors: updatedVendor._id } });
+            await User.updateMany({ vendorsReviewedByMe: { $in: updatedVendor._id } }, { $pull: { vendorsReviewedByMe: updatedVendor._id }, $pullAll: { reviews: updatedVendor.reviews } });
+            await User.updateMany({ vendorsReportedByMe: { $in: updatedVendor._id } }, { $pull: { vendorsReportedByMe: updatedVendor._id }, $pullAll: { reportsByMe: updatedVendor.reports } });
+            await DeletedVendor.insertMany([updatedVendor]);
+            await Vendor.deleteOne({ _id: updatedVendor._id });
         }
         res.json(savedReport);
     } catch (err) {
