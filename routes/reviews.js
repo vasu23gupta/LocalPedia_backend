@@ -150,6 +150,16 @@ router.delete('/:reviewId', async (req, res) => {
 
         const removedReview = await Review.deleteOne({ _id: req.params.reviewId });
 
+        var points = user.points
+        var level=user.level
+        var nextLevelAt=user.nextLevelAt
+        if(points-10<25*(level)*(level)+75*(level))
+        {
+            nextLevelAt=25*(level)*(level)+75*(level)
+            level=level-1;
+        }
+        await User.updateOne({_id:review.by},{ $set: {points:points-10,level:level,nextLevelAt:nextLevelAt}})
+
         res.json(removedReview);
     } catch (err) {
         res.json({ message: err });
