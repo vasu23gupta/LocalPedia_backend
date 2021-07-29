@@ -36,7 +36,7 @@ app.use('/utils', utilsRoute);
 
 //db
 async function connectDB() {
-  await mongoose.connect("mongodb+srv://testUser:testPass@cluster0.neji0.mongodb.net/test?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true });
+  await mongoose.connect(process.env.MONGOURL, { useNewUrlParser: true, useUnifiedTopology: true });
   console.log("db connected");
 }
 connectDB();
